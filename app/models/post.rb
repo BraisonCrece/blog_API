@@ -1,5 +1,6 @@
 class Post < ApplicationRecord
   belongs_to :user
 
-  validates :title, :content, :published, :user_id, presence: true
+  validates :title, :content, :user_id, presence: true
+  validates :published, inclusion: { in: [true, false] }
 end

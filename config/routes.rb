@@ -1,7 +1,6 @@
 Rails.application.routes.draw do
   get 'health/', to: 'health#health'
-  # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
+  resources :posts, only: [:index, :show]
 
-  # Defines the root path route ("/")
   # root "articles#index"
 end

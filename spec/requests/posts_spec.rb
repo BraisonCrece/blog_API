@@ -1,35 +1,81 @@
 require 'rails_helper'
 
 RSpec.describe 'Posts', type: :request do
-  describe 'GET /post' do
-    before { get '/post' }
+  # Devuelve respuesta vacía con código 200 OK para GET /posts
+  describe "GET /posts" do
+    before { get '/posts' }
 
-    it 'returns a OK' do
+    it "should return OK" do
       payload = JSON.parse(response.body)
       expect(payload).to be_empty
       expect(response).to have_http_status(200)
     end
+  end
 
-    describe 'with data in the DB' do
-      # let, método interno de RSpec para definir variables
-      # create_list => Método de FactoryBot para crear listas de instancias
-      let(:posts) { create_list(:post, 10, published: ture) }
+  describe "with data in the DB" do
+    let!(:posts) { create_list(:post, 10, published: true) }
 
+    it "should return all the published posts" do
+      # Mostrar todos los posts publicados posts#index (GET /posts)
+      get '/posts'
       payload = JSON.parse(response.body)
-      expect(payload.size).to       eq(posts.size)
-      expect(response).to           have_http_status(200)
-
-
-      it 'returns all the published posts' do
-        payload = JSON.parse(response.body)
-      
-      end
+      expect(payload.size).to eq(posts.size)
+      expect(response).to have_http_status(200)
     end
   end
 
+  describe "GET /post/{id}" do
+    let!(:post) { create(:post) }
 
+    it "should return a post" do
+      # Mostrar un post post#show (GET /posts/:id)
+      get "/posts/#{post.id}"
+      payload = JSON.parse(response.body)
+      expect(payload).to_not be_empty
+      expect(payload["id"]).to eq(post.id)
+      expect(response).to have_http_status(200)
+    end
+  end
 
-  decribe 'GET /post/:id' do
+  describe "POST /posts" do
+    let!(:user) { create(:user) }
+    it "should create a post" do
+      req_payload = {
+        post: {
+          title: "foo",
+          content: "bar",
+          published: false,
+          user_id: user.id
+        }
+      }
+      # Crear un post post#create (POST /posts)
+      post "/posts", params: req_payload
+      payload = JSON.parse(response.body)
+      expect(payload).to_not be_empty
+      expect(payload["id"]).to_not be_nil
+      expect(response).to have_http_status(:created)      
+    end
+  end
 
+  describe "PUT /posts/:id" do
+    # creamos un post con el factory
+    let!(:article) { create(:post) }
+
+    it "should create a post" do
+      # definimos el payload que vamos a enviar para actualizar el post
+      req_payload = {
+        post: {
+          title: "foo",
+          content: "bar",
+          published: true          
+        }
+      }
+      # actualizamos el post post#update (PUT /posts/:id)
+      put "/posts/#{article.id}", params: req_payload
+      payload = JSON.parse(response.body)
+      expect(payload).to_not be_empty
+      expect(payload["id"]).to eq(article.id)
+      expect(response).to have_http_status(:ok)      
+    end
   end
 end
