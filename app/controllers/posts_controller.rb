@@ -20,19 +20,24 @@ class PostsController < ApplicationController
   end
 
   def create
-    @post = Post.create!(post_params)
+    @post = Post.create!(create_params)
     render json: @post, status: :created
   end
 
   def update
     @post = Post.find(params[:id])
-    @post.update!(post_params)
+    @post.update!(update_params)
     render json: @post, status: :ok
   end
 
   private
 
-  def post_params
+  def create_params
     params.require(:post).permit(:title, :content, :published, :user_id)
   end
+
+  def update_params
+    params.require(:post).permit(:title, :content, :published)
+  end
+  
 end
