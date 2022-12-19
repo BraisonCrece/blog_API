@@ -1,22 +1,36 @@
 require 'rails_helper'
 
 RSpec.describe 'Posts', type: :request do
-  # Devuelve respuesta vacía con código 200 OK para GET /posts
+  # return empty response with 200 status code
   describe "GET /posts" do
-    before { get '/posts' }
-
     it "should return OK" do
+      get '/posts'
       payload = JSON.parse(response.body)
       expect(payload).to be_empty
       expect(response).to have_http_status(200)
     end
+
+    describe "Search" do
+      let!(:hola_mundo) { create(:published_post, title: 'Hola Mundo') }
+      let!(:hola_rails) { create(:published_post, title: 'Hola Rails') }
+      let!(:curso_rails) { create(:published_post, title: 'Curso Rails') }
+      it "should filter posts by title" do
+        get "/posts?search=Hola"
+        payload = JSON.parse(response.body)
+        expect(payload).to_not be_empty
+        expect(payload.size).to eq(2)
+        expect(payload.map { |p| p["id"] }.sort).to eq([hola_mundo.id, hola_rails.id])
+        expect(response).to have_http_status(200)
+      end
+    end
+
   end
 
   describe "with data in the DB" do
     let!(:posts) { create_list(:post, 10, published: true) }
 
     it "should return all the published posts" do
-      # Mostrar todos los posts publicados posts#index (GET /posts)
+      # Show all posts post#index (GET /posts)
       get '/posts'
       payload = JSON.parse(response.body)
       expect(payload.size).to eq(posts.size)
@@ -28,7 +42,7 @@ RSpec.describe 'Posts', type: :request do
     let!(:post) { create(:post) }
 
     it "should return a post" do
-      # Mostrar un post post#show (GET /posts/:id)
+      # Show a post post#show (GET /posts/:id)
       get "/posts/#{post.id}"
       payload = JSON.parse(response.body)
       expect(payload).to_not be_empty
@@ -54,7 +68,7 @@ RSpec.describe 'Posts', type: :request do
           user_id: user.id
         }
       }
-      # Crear un post post#create (POST /posts)
+      # Create a post post#create (POST /posts)
       post "/posts", params: req_payload
       payload = JSON.parse(response.body)
       expect(payload).to_not be_empty
@@ -70,7 +84,7 @@ RSpec.describe 'Posts', type: :request do
           user_id: user.id
         }
       }
-      # Crear un post post#create (POST /posts)
+      # Create a post post#create (POST /posts)
       post "/posts", params: req_payload
       payload = JSON.parse(response.body)
       expect(payload).to_not be_empty
@@ -80,11 +94,11 @@ RSpec.describe 'Posts', type: :request do
   end
 
   describe "PUT /posts/:id" do
-    # creamos un post con el factory
+    # Create a post with factory bot
     let!(:article) { create(:post) }
 
     it "should update a post" do
-      # definimos el payload que vamos a enviar para actualizar el post
+      # we define the payload that we are going to send to update the post
       req_payload = {
         post: {
           title: "foo",
@@ -92,7 +106,7 @@ RSpec.describe 'Posts', type: :request do
           published: true          
         }
       }
-      # actualizamos el post post#update (PUT /posts/:id)
+      # update the post post#update (PUT /posts/:id)
       put "/posts/#{article.id}", params: req_payload
       payload = JSON.parse(response.body)
       expect(payload).to_not be_empty
@@ -108,7 +122,7 @@ RSpec.describe 'Posts', type: :request do
           published: false,
         }
       }
-      # actualizamos el post post#update (PUT /posts/:id)
+      # update the post post#update (PUT /posts/:id)
       put "/posts/#{article.id}", params: req_payload
       payload = JSON.parse(response.body)
       expect(payload).to_not be_empty
