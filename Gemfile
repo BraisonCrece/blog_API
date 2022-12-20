@@ -16,6 +16,10 @@ group :development, :test do
   gem 'rspec-rails', '~> 6.0.0'
 end
 
+group :development do 
+  gem "letter_opener"
+end
+
 group :test do
   gem 'database_cleaner', '~> 2.0'
   gem 'shoulda-matchers', '~> 5.0'

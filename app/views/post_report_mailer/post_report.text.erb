@@ -1,0 +1,12 @@
+Post id: <%= @post.id  %>
+Post title: <%= @post.title  %>
+Report: 
+- Word count: <%= @post_report.word_count %>
+- Word histogram: 
+<% @post_report.word_histogram.each_pair do |word, value| %>
+  - <%= word %>: <%= value %>
+<% end %>
+- Letter histogram: 
+<% @post_report.letter_histogram.each_pair do |word, value| %>
+  - <%= word %>: <%= value %>
+<% end %>
